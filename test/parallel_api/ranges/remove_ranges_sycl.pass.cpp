@@ -23,42 +23,45 @@
 
 #include "support/utils.h"
 
+#include <vector>
 #include <iostream>
+#include <iterator>
 
 int32_t
 main()
 {
 #if _ENABLE_RANGES_TESTING
-    constexpr int max_n = 10;
-    int data[max_n] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    int data2[max_n];
+    using T = int;
 
-    auto lambda1 = [](auto i) { return i * i; };
+    T val1 = 2;
+    T val2 = 3;
+    ::std::vector<T> data = {2, 5, 2, 4, 2, 0, 6, -7, 7, 3};
 
+    ::std::vector<T> in(data);
+    ::std::vector<T>::difference_type in_end_n;
     using namespace oneapi::dpl::experimental::ranges;
-
     {
-        sycl::buffer<int> B(data2, sycl::range<1>(max_n));
-        sycl::buffer<int> C(max_n);
-
-        auto view = iota_view(0, max_n) | views::transform(lambda1);
-        auto range_res = all_view<int, sycl::access::mode::write>(B);
+        sycl::buffer<T> A(in.data(), sycl::range<1>(in.size()));
 
         auto exec = TestUtils::default_dpcpp_policy;
         using Policy = decltype(exec);
         auto exec1 = TestUtils::make_new_policy<TestUtils::new_kernel_name<Policy, 0>>(exec);
         auto exec2 = TestUtils::make_new_policy<TestUtils::new_kernel_name<Policy, 1>>(exec);
 
-        copy(exec1, view, C); //check passing a buffer for writting
-        copy(exec2, C, range_res); //check passing a buffer for reading
+        in_end_n = remove(exec1, A, val1); //check passing a buffer
+        in_end_n = remove(exec2, views::all(A) | views::take(in_end_n), val2); //check passing a view
     }
 
     //check result
-    int expected[max_n];
-    ::std::transform(data, data + max_n, expected, lambda1);
+    ::std::vector<T> exp(data);
+    auto exp_end = ::std::remove(exp.begin(), exp.end(), val1);
+    exp_end = ::std::remove(exp.begin(), exp_end, val2);
 
-    EXPECT_EQ_N(expected, data2, max_n, "wrong effect from copy with factory and sycl ranges");
+    EXPECT_TRUE(::std::distance(exp.begin(), exp_end) == in_end_n, "wrong effect from remove with sycl ranges");
+    EXPECT_EQ_N(exp.begin(), in.begin(), in_end_n, "wrong effect from remove with sycl ranges");
 #endif //_ENABLE_RANGES_TESTING
 
-    return TestUtils::done(_ENABLE_RANGES_TESTING);
+    ::std::cout << TestUtils::done() << ::std::endl;
+    return 0;
 }
+

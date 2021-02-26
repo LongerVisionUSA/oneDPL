@@ -17,9 +17,10 @@
 //
 // Test of linear_congruential_engine - comparison with std::
 
+#include "support/utils.h"
 #include <iostream>
 
-#if _ONEDPL_BACKEND_SYCL
+#if TEST_DPCPP_BACKEND_PRESENT
 #include <vector>
 #include <CL/sycl.hpp>
 #include <random>
@@ -194,11 +195,11 @@ int tests_set_portion(int nsamples, unsigned int part) {
     return 0;
 }
 
-#endif // _ONEDPL_BACKEND_SYCL
+#endif // TEST_DPCPP_BACKEND_PRESENT
 
 int main() {
 
-#if _ONEDPL_BACKEND_SYCL
+#if TEST_DPCPP_BACKEND_PRESENT
 
     constexpr int nsamples = 100;
     int err;
@@ -391,10 +392,7 @@ int main() {
 
 #endif // #if defined(_ONEDPL_RNG_DETAILED_TESTING)
 
-#else
-    std::cout << "\tTest is skipped for non-SYCL backend" << std::endl;
-#endif // _ONEDPL_BACKEND_SYCL
+#endif // TEST_DPCPP_BACKEND_PRESENT
 
-    std::cout << "Test PASSED" << std::endl;
-    return 0;
+    return TestUtils::done(TEST_DPCPP_BACKEND_PRESENT);
 }
