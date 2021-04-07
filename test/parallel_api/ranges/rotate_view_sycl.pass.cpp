@@ -40,22 +40,15 @@ main()
     auto view = nano::ranges::views::all(data) | ranges::views::rotate(rotate_val);
     {
         sycl::buffer<int> A(expected, sycl::range<1>(max_n));
+        A.set_final_data(expected);
+        A.set_write_back(true);
+
         ranges::copy(TestUtils::default_dpcpp_policy, view, A);
     }
 
     //check aasigment
     view[4] = -1;
     expected[4] = -1;
-
-    ::std::cout << "view: ";
-    for(auto v: view)
-        ::std::cout << v << "  ";
-    ::std::cout << ::std::endl;
-
-    ::std::cout << "expected: ";
-    for(auto v: expected)
-        ::std::cout << v << "  ";
-    ::std::cout << ::std::endl;
 
     EXPECT_EQ_N(view.begin(), expected, max_n, "wrong result from rotate view on a device");
 

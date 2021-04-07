@@ -34,18 +34,17 @@ class offset_iterator
     constexpr offset_iterator&
     operator=(const offset_iterator&) = default;
 
-    explicit offset_iterator(I it, difference_type n, difference_type offset, I b)
-        : current_(it), beg_(b), n_(n), offset_(offset)
+    explicit offset_iterator(I it, I b, I e)
+        : current_(it), beg_(b), n_(e-b)
     {
-        assert(it >= b);
-        assert(it < b + n);
+          assert(it >= b && it < e);
     }
 
   private:
     constexpr difference_type
     offset_position() const
     {
-        return current_ - beg_ + offset_;
+        return current_ - beg_;
     }
 
   public:
@@ -54,7 +53,7 @@ class offset_iterator
     constexpr difference_type
     operator-(const offset_iterator& __it) const
     {
-        return offset_position() - __it.offset_position();
+        return current_ - __it.current_;
     }
     constexpr offset_iterator&
     operator+=(difference_type __forward)
@@ -144,7 +143,6 @@ class offset_iterator
     I current_{};
     I beg_{};
     difference_type n_;
-    difference_type offset_;
 };
 
 namespace rotate_view_
@@ -182,7 +180,7 @@ struct rotate_view : view_interface<rotate_view<V>>
     constexpr auto
     begin() const
     {
-        return offset_iterator(ranges::begin(base()), base().size(), offset_, ranges::begin(base()));
+        return offset_iterator(ranges::begin(base()) + offset_, ranges::begin(base()), ranges::end(base()));
     }
 
     constexpr auto
