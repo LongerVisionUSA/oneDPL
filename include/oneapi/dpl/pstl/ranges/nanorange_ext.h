@@ -34,11 +34,7 @@ class offset_iterator
     constexpr offset_iterator&
     operator=(const offset_iterator&) = default;
 
-    explicit offset_iterator(I it, I b, I e)
-        : current_(it), beg_(b), n_(e-b)
-    {
-          assert(it >= b && it < e);
-    }
+    explicit offset_iterator(I it, I b, I e) : current_(it), beg_(b), n_(e - b) { assert(it >= b && it < e); }
 
   private:
     constexpr difference_type
