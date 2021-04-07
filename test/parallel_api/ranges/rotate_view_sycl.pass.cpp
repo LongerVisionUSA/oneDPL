@@ -47,6 +47,16 @@ main()
     view[4] = -1;
     expected[4] = -1;
 
+    ::std::cout << "view: ";
+    for(auto v: view)
+        ::std::cout << v << "  ";
+    ::std::cout << ::std::endl;
+
+    ::std::cout << "expected: ";
+    for(auto v: expected)
+        ::std::cout << v << "  ";
+    ::std::cout << ::std::endl;
+
     EXPECT_EQ_N(view.begin(), expected, max_n, "wrong result from rotate view on a device");
 
 #endif //_ENABLE_RANGES_TESTING
